@@ -6,6 +6,7 @@ PVector rocketVel;
 
 //Flux optique
 Capture cam;
+boolean hasCam = false;
 PImage previousFrame;
 float flowX = 0, flowY = 0, flowIntensity = 0;
 
@@ -21,8 +22,12 @@ void setup() {
   rocketVel = new PVector(2, 0); // vitesse initiale plus douce
 
   // Webcam
-  cam = new Capture(this, 640, 480);
-  cam.start();
+  String[] cams = Capture.list();
+  if (cams != null && cams.length > 0) {
+    hasCam = true;
+    cam = new Capture(this, 640, 480);
+    cam.start();
+  }
 
   // Étoiles
   stars = new float[numStars][3];
@@ -34,7 +39,7 @@ void setup() {
 }
 
 void captureEvent(Capture cam) {
-  cam.read();
+  if (hasCam) cam.read();
 }
 
 void draw() {
@@ -84,6 +89,8 @@ void computeOpticalFlow() {
   flowX = 0;
   flowY = 0;
   flowIntensity = 0;
+
+  if (!hasCam) return;
 
   if (previousFrame == null) {
     previousFrame = cam.get();
@@ -137,9 +144,9 @@ void drawRocket(PVector pos, PVector vel) {
 
   // Flamme animée selon vitesse
   float flameLength = map(rocketVel.mag(), 0, 10, 3, 20);
-  float flameRed = map(rocketVel.mag(), 0, 10, 255, 255);
+  float flameRed = 255;
   float flameGreen = map(rocketVel.mag(), 0, 10, 150, 50);
-  float flameBlue = map(rocketVel.mag(), 0, 10, 0, 0);
+  float flameBlue = 0;
 
   fill(flameRed, flameGreen, flameBlue, 200);
   noStroke();
